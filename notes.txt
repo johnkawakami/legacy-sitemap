@@ -1,0 +1,38 @@
+# Deployment Blues
+
+
+We need it like this:
+
+http://example.com/legacy-sitemap/api/
+http://example.com/legacy-sitemap/app/
+
+Config on the web host
+
+.../example.com/public/
+.../example.com/public/legacy-sitemap/ - blank page
+.../example.com/public/legacy-sitemap/api/ - php app access root
+.../example.com/public/legacy-sitemap/app/ - the static js app
+.../example.com/legacy-sitemap/
+.../example.com/legacy-sitemap/vendor/
+.../example.com/legacy-sitemap/phpsrc/
+
+
+The dev env should be structured like this:
+
+<prj>/public/<prj>/
+<prj>/public/<prj>/api/
+<prj>/public/<prj>/app/
+----- this is the composer and php parts---
+<prj>/<prj>/vendor/
+<prj>/<prj>/src/
+<prj>/<prj>/tests/
+<prj>/<prj>/logs/
+<prj>/<prj>/templates/
+<prj>/<prj>/data/
+<prj>/<prj>/public/
+<prj>/<prj>/composer.json
+----- this is the npm js part
+<prj>/app/package.json
+<prj>/app/node_modules/
+<prj>/app/src/
+<prj>/app/public/

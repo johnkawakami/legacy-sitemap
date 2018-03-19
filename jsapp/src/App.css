@@ -1,0 +1,134 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+body {
+  font: 14px "Century Gothic", Futura, sans-serif;
+  margin: 20px;
+}
+
+ol, ul {
+  padding-left: 30px;
+}
+
+.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  height: 34px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 34px;
+}
+
+.square:focus {
+  outline: none;
+}
+
+.kbd-navigation .square:focus {
+  background: #ddd;
+}
+
+.game {
+  display: flex;
+  flex-direction: row;
+}
+
+.game-info {
+  margin-left: 20px;
+}
+
+
+div.game-display {
+    display: flex;
+    width: 600px;
+    height: 400px;
+    background-color: #0f0;
+    color: black;
+    font-family: monospace;
+}
+
+div.output {
+    width: 390px;
+    height: 390px;
+    padding: 5px;
+    background-color: black;
+    color: #0f0;
+}
+
+div.plan {
+    text-align: center;
+    margin: 5px;
+    padding: 5px;
+    width: 180px;
+    height: 380px;
+    background-color: white;
+    color: black;
+}
+
+div.range {
+    margin-top: 20px;
+}
+button.play-button {
+    margin-top: 20px;
+}
+
+div.range__numbers {
+    display: flex;
+    width: 140px;
+    margin: auto;
+}
+span.range__numbers_left {
+    text-align: left;
+    width: 33%;
+    color: lightblue;
+}
+span.range__numbers_center {
+    text-align: center;
+    width: 33%;
+}
+span.range__numbers_right {
+    text-align: right;
+    width: 33%;
+    color: lightblue;
+}

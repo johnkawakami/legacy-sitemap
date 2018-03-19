@@ -1,0 +1,10 @@
+
+RewiteEngine on
+
+# BEGIN PAGE REDIRECTS
+RewriteRule ^data/html/file2.html foo/file2.html [R=301,L]
+RewriteRule ^data/html/file2.html$ foo/file2.html [R=301,L]
+RewriteRule ^data/html/file3.html$ foo/file3.html [R=301,L]
+RewriteRule ^data/html/file4.html$ foo/file4.html [R=301,L]
+# END PAGE REDIRECTS
+

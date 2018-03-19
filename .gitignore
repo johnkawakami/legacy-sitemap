@@ -1,0 +1,8 @@
+/legacy-sitemap/vendor/
+/legacy-sitemap/logs/*
+/legacy-sitemap/tmp/
+!/logs/README.md
+/jsapp/node_modules/
+/jsapp/build/
+/public/legacy-sitemap/app/
+legacy-sitemap.zip
