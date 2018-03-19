@@ -1,0 +1,9 @@
+AuthType Basic
+AuthName "Legacy Sitemap"
+# replace the path with the path to your htpasswd file
+AuthUserFile /www/riceball.com/htpasswd
+Require valid-user
+
+# Cause Slim routes to work without a visible index.php
+RewriteEngine On
+RewriteRule ^api(/.+)$ api/index.php$1 [L,END]
