@@ -6,3 +6,7 @@
 /jsapp/build/
 /public/legacy-sitemap/app/
 legacy-sitemap.zip
+*.env
+htaccess
+jsapp/public/key.js
+/vagrant-test/.vagrant

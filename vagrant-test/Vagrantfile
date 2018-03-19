@@ -1,0 +1,17 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "ubuntu/xenial64"
+  # config.vm.box_url = "http://files.vagrantup.com/trusty64.box"
+  config.vm.network :private_network, ip: "192.168.33.21"
+  # install the old python and symlink it
+  config.vm.provision "shell", inline: "sudo apt -y install python2.7\nsudo ln -sf /usr/bin/python2.7 /usr/bin/python"
+  config.vm.provision "ansible" do |ansible|
+      ansible.playbook = "ansible/playbook.yml"
+  end
+  config.vm.synced_folder ".", "/var/www"
+end

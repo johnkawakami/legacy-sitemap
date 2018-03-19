@@ -29,6 +29,7 @@ $container['textSitemap'] = function($c) {
     $sitemap = new JK\TextSitemap($settings['root-directory'], $settings['root-url']);
     $sitemap->setDatabase($c->get('database'));
     $sitemap->addDirectories($settings['directories']);
+    $sitemap->setSitemapPath($settings['sitemap-path']);
     $sitemap->setRemoveFromTitle($settings['remove-from-title']);
     return $sitemap;
 };
@@ -41,10 +42,35 @@ $container['fileMover'] = function($c) {
     return $fileMover;
 };
 
-// apache htaccess redirect manager
-$container['apacheRedirectManager'] = function($c) {
-    $settings = $c->get('settings')['apache-redirect-manager'];
-    $manager = new JK\ApacheRedirectManager($c->get('database'), $settings['htaccess']);
+// reads and writes .htaccess files
+$container['apacheRedirectTableGateway'] = function($c) {
+    $settings = $c->get('settings')['apache-redirect-table-gateway'];
+    $manager = new JK\ApacheRedirectTableGateway($settings['root-directory'], $settings['htaccess']);
+    return $manager;
+};
+
+// reads the output from HTML Import
+$container['htmlImportRedirectTableGateway'] = function($c) {
+    $settings = $c->get('settings')['html-import-redirect-table-gateway'];
+    $manager = new JK\HtmlImportRedirectTableGateway();
+    return $manager;
+};
+
+// higher-level functions to work with the database's redirect table
+$container['redirectTableTS'] = function($c) {
+    $settings = $c->get('settings');
+    $manager = new JK\RedirectTableTS($settings['database']);
+    return $manager;
+};
+
+// implementation for the importation service
+$container['redirectImportationProvider'] = function($c) {
+    $manager = new JK\RedirectImportationProvider(
+        $c['redirectTableTS'],
+        $c['htmlImportRedirectTableGateway'],
+        $c['apacheRedirectTableGateway']
+    );
+
     return $manager;
 };
 

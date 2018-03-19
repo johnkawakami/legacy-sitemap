@@ -1,0 +1,91 @@
+- hosts: all
+  vars:
+    host_ip: "{{ lookup('file', 'host_ip') }}"
+    wp_admin_email: "{{ lookup('file', 'wp_admin_email') }}"
+  become: true
+  become_user: root
+  become_method: sudo
+  remote_user: yes
+  gather_facts: yes
+  pre_tasks:
+    - name: 'install python2'
+      raw: sudo apt-get -y install python-simplejson
+  tasks:
+    - copy: src=files/70proxy dest=/etc/apt/apt.conf.d/70proxy
+    - apt: update_cache=yes
+    - debconf: name='mysql-server' question='mysql-server/root_password' vtype='password' value='root'
+    - debconf: name='mysql-server' question='mysql-server/root_password_again' vtype='password' value='root'
+    - apt: name={{ item }} state=present
+      with_items:
+        - vim 
+        - curl 
+        - python-software-properties 
+        - python-apt
+    - apt_repository: repo='ppa:ondrej/php' update_cache=yes
+    - apt: name={{ item }} state=present
+      with_items:
+        - php7.2 
+        - apache2 
+        - libapache2-mod-php7.2
+        - php7.2-curl 
+        - php7.2-gd 
+        - php-mcrypt 
+        - php7.2-mbstring 
+        - php7.2-mysql 
+        - php7.2-readline 
+        - php7.2-sqlite3
+        - php-xdebug
+        - mysql-server-5.7
+        - git-core 
+        - python-mysqldb
+    - apache2_module: state=present name=rewrite
+    - lineinfile: dest=/etc/php/7.2/apache2/php.ini regexp='error_reporting = .*' line='error_reporting = E_ALL'
+    - lineinfile: dest=/etc/php/7.2/apache2/php.ini regexp='display_errors = .*' line='display_errors = On'
+    - lineinfile: dest=/etc/php/7.2/apache2/php.ini regexp='disable_functions = .*' line='disable_functions = /'
+    - name: change the apache2 run user to vagrant
+      lineinfile: dest=/etc/apache2/envvars regexp='APACHE_RUN_USER' line='export APACHE_RUN_USER=vagrant'
+    - name: change the apache2 run group to vagrant
+      lineinfile: dest=/etc/apache2/envvars regexp='APACHE_RUN_GROUP' line='export APACHE_RUN_GROUP=vagrant'
+    - shell: 'curl -sS https://getcomposer.org/installer | php'
+    - command: 'mv composer.phar /usr/local/bin/composer'
+    - service: name=apache2 state=restarted
+    - file:
+        dest: /var/www/html
+        owner: vagrant
+        group: vagrant
+        recurse: yes
+    - name: install wp-cli
+      get_url: 
+        dest=/usr/local/bin/wp
+        mode=a+rx
+        url=https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    - name: install wp
+      become: true
+      become_user: vagrant
+      become_method: sudo
+      command: wp core download
+      args:
+        chdir: /var/www/html/
+        creates: /var/www/html/wp-config-sample.php
+    - name: delete /var/www/html/index.html
+      file: path=/var/www/html/index.html state=absent
+    - name: create a mysql database named vagrant
+      mysql_db:
+        name=vagrant
+        state=present
+        login_user=root
+        login_password=root
+        encoding=utf8
+    - name: create wordpress config file
+      become: true
+      become_user: vagrant
+      become_method: sudo
+      command: 'wp core config --allow-root --dbname=vagrant --dbuser=root --dbpass=root'
+      args:
+        chdir: /var/www/html/
+        creates: /var/www/html/wp-config.php
+    - name: create wordpress site and admin user
+      become: true
+      become_user: vagrant
+      become_method: sudo
+      command: 'wp core install --path=/var/www/html --url=http://{{ host_ip }} --title=NoName --admin_user=admin --admin_password=admin --admin_email={{ wp_admin_email }} --skip-email'

@@ -10,6 +10,9 @@
  *
  * All paths are relative to the $rootDir.
  * Absolute paths cannot be specified.
+ *
+ * If a file is not found at the path given, it finds the file within
+ * one of the state directories, and moves it to the destination.
  */
 
 namespace JK;
@@ -52,8 +55,8 @@ class FileMover
             $oldstate = $this->find($filename);
             if ($oldstate == $state) return;
 
-            $path1 = $this->rootDir.$this->states[$oldstate].DIRECTORY_SEPARATOR.$filename;
-            $path2 = $this->rootDir.$this->states[$state].DIRECTORY_SEPARATOR.$filename;
+            $path1 = $this->states[$oldstate].DIRECTORY_SEPARATOR.$filename;
+            $path2 = $this->states[$state].DIRECTORY_SEPARATOR.$filename;
             rename($path1, $path2);
         }
     }
@@ -71,5 +74,4 @@ class FileMover
         }
         throw new \Exception("$filename not found in any directory");
     }
-    
 }

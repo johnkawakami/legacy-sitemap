@@ -1,0 +1,3 @@
+# Cause Slim routes to work without a visible index.php
+RewriteEngine On
+RewriteRule ^(.+)$ index.php/$1 [L,END]

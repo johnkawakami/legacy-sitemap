@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Legacy Sitemap"
+AuthUserFile __HTPASSWD__
+Require valid-user

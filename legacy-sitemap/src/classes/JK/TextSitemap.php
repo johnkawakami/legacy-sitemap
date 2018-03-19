@@ -3,9 +3,30 @@
 namespace JK;
 
 /**
- * Produces a sitemap for directories with HTML files.
+ * Produces text and HTML sitemaps for directories with HTML files.
+ *
+ * Text sitemaps are simple lists of URLs.
+ *
+ * HTML sitemaps are linked titles; the Array sitemap is an array of
+ * URLs and titles.
+ *
+ * The sitemap can be written to a file.
+ *
+ * @example
+ *     $ts = new TextSitemap($dir, $url);
+ *     $ts->setDatabase($pathToDb);
+ *     $ts->addDirectories( ['state'=>'path', ...] );
+ *     $ts->setRemoveFromTitle('Text in the Title');
+ *     $ts->refreshDatabase();
+ *
+ *     $ts->setSitemapPath( ... );
+ *     $ts->saveTextSitemap();
+ *
+ * fixme - this should be broken into two classes, the sitemap
+ * rendering and saving should be separate from the database.
+ * SitemapTableGateway.php and TextSitemap.php
+ * and maybe HtmlDirectoryGateway.php
  */
-
 class TextSitemap
 {
     protected $sitemapPath;
@@ -14,6 +35,7 @@ class TextSitemap
     protected $database;
     protected $rootUrl;
     protected $removeText;
+    const REFRESH_FLAG = '/tmp/legacy-sitemap.refresh.flag';
 
     function __construct($rootDir, $rootUrl) 
     {
@@ -30,6 +52,7 @@ class TextSitemap
         $result = $this->database->querySingle("SELECT name FROM sqlite_master WHERE type='table' AND name='titles'");
         if ($result!='titles') {
             $this->database->exec('CREATE TABLE titles (url TEXT PRIMARY KEY, title TEXT)');
+            touch(self::REFRESH_FLAG);
         }
     }
 
@@ -53,11 +76,18 @@ class TextSitemap
         touch($this->sitemapPath);
     }
 
+    /**
+     * Scans the directories and produces a table of titles and file paths.
+     * The titles are extracted from the HTML files.
+     */
     public function refreshDatabase() 
     {
         $this->database->exec('DELETE FROM titles');
         foreach($this->dirs as $dir) {
             $diter = dir($this->rootDir . $dir);
+            if ($diter === false) {
+                throw new Exception($dir." caused error");
+            }
             while($filename = $diter->read()) {
                 if ($filename=='.' || $filename=='..') continue;
                 $path = $dir . $filename;
@@ -100,22 +130,27 @@ class TextSitemap
         return $path;
     }
 
+    /**
+     * @return string A list of URLs.
+     */
     public function getTextSitemap(): string
     {
-        $result = $this->database->query('SELECT url FROM titles');
+        $arr = $this->getArraySitemap();
         $o = [];
-        while($row = $result->fetchArray()) {
+        foreach($arr as $row) {
             $o[] = $row['url'];
         }
         return implode("\n", $o);
     }
 
+    /**
+     * @return string HTML sitemap of linked titles.
+     */
     public function getHtmlSitemap(): string
     {
-        $title_stmt = $this->database->prepare('SELECT url, title FROM titles');
-		$result = $title_stmt->execute();
+        $arr = $this->getArraySitemap();
         $o = [];
-        while($row = $result->fetchArray()) {
+        foreach($arr as $row) {
             $url = $row['url'];
             $title = $row['title'];
             $o[] = "<a href='$url'>$title</a><br />\n";
@@ -123,8 +158,15 @@ class TextSitemap
         return implode("\n", $o);
     }
 
+    /**
+     * @return array Sitemap as an array of URLs and Titles.
+     */
     public function getArraySitemap(): array
     {
+        if (file_exists(self::REFRESH_FLAG)) {
+            $this->refreshDatabase();
+            unlink(self::REFRESH_FLAG);
+        }
         $title_stmt = $this->database->prepare('SELECT url, title FROM titles');
 		$result = $title_stmt->execute();
         $o = [];
@@ -140,6 +182,9 @@ class TextSitemap
         file_put_contents($this->sitemapPath, $sitemap);
     }
 
+    /**
+     * Utility function to extract HTML titles from HTML files.
+     */
     private function getHtmlTitle($path, $remove=null) 
     {
         $file = file_get_contents($this->rootDir . $path);
@@ -148,11 +193,17 @@ class TextSitemap
             if ($remove !== null) {
                 $title = str_replace($remove, '', $title);
             }
+            $title = html_entity_decode($title, ENT_QUOTES|ENT_HTML5 );
             return $title;
         }
         return null;
     }
 
+    /**
+     * Titles from most CMSs include the site title along with
+     * the article title. This sets a string that's removed
+     * from the title when the titles are read from the files.
+     */
     public function setRemoveFromTitle($text) {
         $this->removeText = $text;
     }

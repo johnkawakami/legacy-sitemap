@@ -2,7 +2,6 @@
 // Application middleware
 
 
-
 // lazy cors
 $app->add(function ($req, $res, $next) {
     $ua = $req->getHeader('user-agent')[0];
@@ -14,3 +13,14 @@ $app->add(function ($req, $res, $next) {
         ->withHeader('Access-Control-Allow-Origin', '*');
 });
 
+// API key check
+$app->add(function ($req, $res, $next) {
+    $auth = $req->getHeader('authorization')[0];
+    $parts = explode(' ', $auth);
+    if ($parts[1] === getenv('LEGACY_SITEMAP_API_KEY')) {
+        $response = $next($req, $res);
+        return $response;
+    } else {
+        return $res->withStatus(403)->withJson([ 'status'=>403, 'error'=>'Bad Authorization' ]);
+    }
+});

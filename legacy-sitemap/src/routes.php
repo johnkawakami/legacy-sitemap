@@ -11,19 +11,27 @@ $app->options('/{routes:.+}', function ($request, $response, $args) {
 });
 
 $app->get('/', function (Request $request, Response $response, array $args) {
-    return 'Hello, world.';
+    return 'Legacy Sitemap';
 });
 $app->get('/refresh', function (Request $request, Response $response, array $args) {
-    $this->textSitemap->refreshDatabase();
-    $args['list'] = $this->textSitemap->getHtmlSitemap();
-    return $this->renderer->render($response, 'app.phtml', $args);
+    try {
+        $this->textSitemap->refreshDatabase();
+        $args['list'] = $this->textSitemap->getHtmlSitemap();
+        return $this->renderer->render($response, 'app.phtml', $args);
+    } catch (Exception $e) {
+        return $response->withStatus(500)->write(htmlspecialchars($e->getMessage()));
+    }
 });
 
 // REST API
 $app->get('/sitemap', function (Request $request, Response $response, array $args) {
-    $sitemap = $this->textSitemap->getArraySitemap();
-    $newResponse = $response->withJson($sitemap);
-    return $newResponse;
+    try {
+        $sitemap = $this->textSitemap->getArraySitemap();
+        $newResponse = $response->withJson($sitemap);
+        return $newResponse;
+    } catch (Exception $e) {
+        return $response->withStatus(500)->withJson(['status'=> ($e->getMessage()) ]);
+    }
 });
 
 $app->post('/move', function (Request $request, Response $response, array $args) {
@@ -37,7 +45,11 @@ $app->post('/move', function (Request $request, Response $response, array $args)
 
     // convert the URL to a filename
     $file = $this->textSitemap->urlToPath($url);
+    // move it
     $this->fileMover->move($file, $state);
+    // mark this file in the redirect table, for later
+    $this->redirectTableTS->addFile($file);
+
     $this->textSitemap->refreshDatabase();
     $this->textSitemap->saveTextSitemap();
 
@@ -45,3 +57,14 @@ $app->post('/move', function (Request $request, Response $response, array $args)
     return $response->withJson($o);
 });
 
+$app->post('/html-import-redirects', function (Request $request, Response $response, array $args) {
+    $rip = $this->redirectImportationProvider;
+    $params = $request->getParsedBody();
+    $data = $params['data'];
+    $rip->importText($data);
+    // move all the imported rows' files to the trash
+    array_map(function($row) {
+        $this->fileMover->move( basename($row['file']), 'trash' );
+    }, $rip->getImportedRows());
+    return $response->withJson([ "errors" => $rip->getImportErrors(), "successes" => $rip->getImportedRows() ]);
+});

@@ -1,6 +1,11 @@
 <?php
-$docroot = '/www/riceball.com/public/';
-$urlroot = "http://localhost:8080/";
+
+$dotenv = new Dotenv\Dotenv(__DIR__.'/../../', 'legacy-sitemap.env');
+$dotenv->load();
+$dotenv->required('LEGACY_SITEMAP_DOCROOT');
+$dotenv->required('LEGACY_SITEMAP_URL');
+$dotenv->required('LEGACY_SITEMAP_DATABASE');
+$dotenv->required('LEGACY_SITEMAP_API_KEY');
 
 return [
     'settings' => [
@@ -26,10 +31,10 @@ return [
                 'd/content/',
                 'd/node/',
             ],
-            'sitemap-path' => 'd/sitemap.txt',
             'remove-from-title' => '| a computer hobbyist\'s notebook',
-            'root-directory' => $docroot,
-            'root-url' => $urlroot
+            'root-directory' => getenv('LEGACY_SITEMAP_DOCROOT'),
+            'root-url' => getenv('LEGACY_SITEMAP_URL'),
+            'sitemap-path' => getenv('LEGACY_SITEMAP_DOCROOT').'d/sitemap.txt'
         ],
 
         // HTML File Mover
@@ -39,16 +44,18 @@ return [
                 'import' => 'html-files-to-import/',
                 'retain' => 'r/'
             ],
-            'root-directory' => $docroot
+            'root-directory' => getenv('LEGACY_SITEMAP_DOCROOT')
         ],
 
         // Apache Redirect manager for htaccess file
-        'apache-redirect-manager' => [
+        'apache-redirect-table-gateway' => [
             'htaccess' => 'd/.htaccess',
+            'root-directory' => getenv('LEGACY_SITEMAP_DOCROOT')
         ],
 
         // SQLite3 Database shared between the sitemap and redirect manager
-        'database' => '/www/riceball.com/titles.sqlite',
+        'database' => getenv('LEGACY_SITEMAP_DATABASE'),
+        'appkey' => getenv('LEGACY_SITEMAP_API_KEY') 
 
     ],
 ];

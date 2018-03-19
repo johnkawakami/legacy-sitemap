@@ -7,6 +7,8 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Http\Environment;
 
+$dotenv = new \Dotenv\Dotenv(__DIR__.'/../../../', 'legacy-sitemap.env');
+$dotenv->load();
 /**
  * This is an example class that shows how you could set up a method that
  * runs the application. Note that it doesn't cover all use-cases and is
@@ -36,12 +38,16 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
         $environment = Environment::mock(
             [
                 'REQUEST_METHOD' => $requestMethod,
-                'REQUEST_URI' => $requestUri
+                'REQUEST_URI' => $requestUri,
+                'LEGACY_SITEMAP_API_KEY' => getenv('LEGACY_SITEMAP_API_KEY')
             ]
         );
 
         // Set up a request object based on the environment
         $request = Request::createFromEnvironment($environment);
+
+        // Add authentication token
+        $request = $request->withHeader('Authorization', 'bearer ' . getenv('LEGACY_SITEMAP_API_KEY'));
 
         // Add request data, if it exists
         if (isset($requestData)) {
