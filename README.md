@@ -1,6 +1,6 @@
 # legacy-sitemap
 
-This application installation doesn't yet work.
+See the [website][https://johnkawakami.github.io/legacy-sitemap/]
 
 ## Description
 
