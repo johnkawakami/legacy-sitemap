@@ -1,6 +1,6 @@
 # legacy-sitemap
 
-This application installation doesn't yet work.
+See the [website](https://johnkawakami.github.io/legacy-sitemap/).
 
 ## Description
 
@@ -15,7 +15,7 @@ site.
 
 ## Installation
 
-Download `legacy-sitemap.zip`.
+Download the zip file from the [releases](https://github.com/johnkawakami/legacy-sitemap/releases).
 
 Unzip it, and a folder called `legacy-sitemap-bundle` is extracted.
 
@@ -281,7 +281,7 @@ Paste the list of redirects into the form, and submit.
 
 Click on the links to test the redirects.
 
-### What is Retain?
+### What is "Retaining"?
 
 Retaining an article removes it from the site, but doesn't import it into
 the new CMS.
@@ -292,3 +292,18 @@ on other websites.
 Trashing is reserved for low-quality content.
 
 You can download the retained file directory and do with it what you want.
+
+#### Why retain rather than just keeping the old article around?
+
+Retaining (and trashing) remove an article from the web. The search
+engines can then, eventually, drop if from their indexes.
+
+The next time, the search engines 
+crawl the article, whether it's on your current site at a new URL,
+or another site, it is less likely to reject the
+article for being a duplicate of itself.
+
+Likewise, the 301 redirect features were added so, as articles
+were migrated, the search engines would remove the old URLs
+rom their indexes, and make it less likely to consider the moved
+content as "duplicated" conteht.
